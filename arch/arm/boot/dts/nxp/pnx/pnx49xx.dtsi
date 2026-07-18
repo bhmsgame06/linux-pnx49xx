@@ -1,0 +1,54 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * NXP PNX49xx SoC
+ *
+ * Copyright (C) 2026 BHmsWare <bhmsgamexbox2010@gmail.com>
+ */
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	aliases {
+		serial0 = &uart0;
+		serial1 = &uart1;
+	};
+
+	soc {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		intc: interrupt-controller@70001000 {
+			compatible = "nxp,pnx49xx-intc";
+			reg = <0x70001000 0x1000>;
+			interrupt-controller;
+			#interrupt-cells = <1>;
+		};
+
+		uart0: serial@70007000 {
+			compatible = "nxp,pnx49xx-uart";
+			reg = <0x70007000 0x1000>;
+			interrupt-parent = <&intc>;
+			interrupts = <14>;
+			status = "disabled";
+		};
+
+		uart1: serial@70006000 {
+			compatible = "nxp,pnx49xx-uart";
+			reg = <0x70006000 0x1000>;
+			interrupt-parent = <&intc>;
+			interrupts = <17>;
+			status = "disabled";
+		};
+
+		timer@7000b000 {
+			compatible = "nxp,pnx49xx-timer";
+			reg = <0x7000b000 0x1000>;
+			interrupt-parent = <&intc>;
+			interrupts = <18>;
+			clock-frequency = <32768>;
+		};
+	};
+};
