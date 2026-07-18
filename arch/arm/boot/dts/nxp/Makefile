@@ -4,3 +4,4 @@ subdir-y += lpc
 subdir-y += ls
 subdir-y += mxs
 subdir-y += vf
+subdir-y += pnx

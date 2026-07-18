@@ -481,6 +481,16 @@ config ARCH_LPC18XX
 	  Support for NXP's LPC18xx Cortex-M3 and LPC43xx Cortex-M4
 	  high performance microcontrollers.
 
+config ARCH_PNX49XX
+	bool "NXP PNX49xx"
+	depends on ARCH_MULTI_V5
+	depends on CPU_LITTLE_ENDIAN
+	select CPU_ARM926T
+	select PNX49XX_INTC
+	select PNX49XX_TIMER
+	help
+	  Support for NXP's PNX49XX SoC mobile chipset.
+
 config ARCH_MPS2
 	bool "ARM MPS2 platform"
 	depends on ARM_SINGLE_ARMV7M

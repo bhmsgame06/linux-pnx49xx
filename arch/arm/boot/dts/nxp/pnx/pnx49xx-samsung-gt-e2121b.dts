@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Samsung GT-E2121B PNX4852 board
+ *
+ * Copyright (C) 2026 BHmsWare <bhmsgamexbox2010@gmail.com>
+ */
+
+/dts-v1/;
+#include "pnx49xx.dtsi"
+
+/ {
+	model = "Samsung GT-E2121B";
+	compatible = "samsung,gt-e2121b", "nxp,pnx49xx";
+
+	memory@a0000000 {
+		device_type = "memory";
+		reg = <0xa0000000 0x01000000>;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,9600 earlycon=pnx49xx_uart,mmio32,0x70007000";
+	};
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&uart1 {
+	status = "okay";
+};
