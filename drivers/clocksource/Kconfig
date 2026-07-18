@@ -793,6 +793,14 @@ config RTK_SYSTIMER
 	  this option only when building for a Realtek platform or for compilation
 	  testing.
 
+config PNX49XX_TIMER
+	bool "NXP PNX49XX timer support"
+	depends on ARCH_PNX49XX
+	depends on TIMER_OF
+	select CLKSRC_MMIO
+	help
+	  Support for the NXP PNX49XX SoC timer.
+
 choice
 	prompt "NXP clocksource for scheduler clock"
 	depends on SOC_VF610 || ARCH_S32
