@@ -58,9 +58,9 @@ static irqreturn_t pnx49xx_clkevt_interrupt(int irq, void *dev_id)
 static int pnx49xx_clkevt_set_next_event(unsigned long evt, struct clock_event_device *ced)
 {
 	writel_relaxed(evt, base + PNX49XX_TIMER1_RELOAD);
-	writel_relaxed(PNX49XX_TIMER_ENABLE_MASK, base + PNX49XX_TIMER1_CTRL_SET);
-
 	pnx49xx_clkevt_sync_reload();
+
+	writel_relaxed(PNX49XX_TIMER_ENABLE_MASK, base + PNX49XX_TIMER1_CTRL_SET);
 
 	return 0;
 }
@@ -99,17 +99,16 @@ static int __init pnx49xx_timer_init(struct device_node *np)
 		return ret;
 	}
 
-	sched_clock_register(pnx49xx_sched_clock_read, 32, rate);
-	ret = clocksource_mmio_init(base + PNX49XX_TIMER0_READ, "pnx49xx_clocksource",
-			rate, 200, 32, clocksource_mmio_readl_up);
-
 	writel_relaxed(PNX49XX_TIMER_DIR_UP | PNX49XX_TIMER_CYCLIC | PNX49XX_TIMER_ENABLE_MASK,
 			base + PNX49XX_TIMER0_CTRL_SET);
 
+	ret = clocksource_mmio_init(base + PNX49XX_TIMER0_READ, "pnx49xx_clocksource",
+			rate, 200, 32, clocksource_mmio_readl_up);
 	if (ret) {
 		pr_err("cannot register clocksource\n");
 		return ret;
 	}
+	sched_clock_register(pnx49xx_sched_clock_read, 32, rate);
 
 	/* setting up sched timer (timer 1) */
 
