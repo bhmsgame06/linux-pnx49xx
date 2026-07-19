@@ -96,7 +96,7 @@ static int __init pnx49xx_timer_init(struct device_node *np)
 	ret = of_property_read_u32(np, "clock-frequency", &rate);
 	if (ret) {
 		pr_err("cannot get clock-frequency value\n");
-		return ret;
+		goto err;
 	}
 
 	writel_relaxed(PNX49XX_TIMER_DIR_UP | PNX49XX_TIMER_CYCLIC | PNX49XX_TIMER_ENABLE_MASK,
@@ -106,7 +106,7 @@ static int __init pnx49xx_timer_init(struct device_node *np)
 			rate, 300, 32, clocksource_mmio_readl_up);
 	if (ret) {
 		pr_err("cannot register clocksource\n");
-		return ret;
+		goto err;
 	}
 	sched_clock_register(pnx49xx_sched_clock_read, 32, rate);
 
@@ -117,7 +117,8 @@ static int __init pnx49xx_timer_init(struct device_node *np)
 	irq = irq_of_parse_and_map(np, 0);
 	if (irq <= 0) {
 		pr_err("get irq failed\n");
-		return -EINVAL;
+		ret = -EINVAL;
+		goto err;
 	}
 
 	ret = request_irq(irq,
@@ -128,13 +129,17 @@ static int __init pnx49xx_timer_init(struct device_node *np)
 
 	if (ret) {
 		pr_err("request irq failed\n");
-		return ret;
+		goto err;
 	}
 
 	pnx49xx_clockevent.cpumask = cpumask_of(0);
 	clockevents_config_and_register(&pnx49xx_clockevent, rate, 1, -1);
 
 	return 0;
+
+err:
+	iounmap(base);
+	return ret;
 }
 
 TIMER_OF_DECLARE(pnx49xx_timer, "nxp,pnx49xx-timer", pnx49xx_timer_init);
