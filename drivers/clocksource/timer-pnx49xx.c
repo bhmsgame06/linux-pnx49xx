@@ -75,7 +75,7 @@ static int pnx49xx_clkevt_shutdown(struct clock_event_device *ced)
 static struct clock_event_device pnx49xx_clockevent = {
 	.name				= "pnx49xx_clockevent",
 	.features			= CLOCK_EVT_FEAT_ONESHOT,
-	.rating				= 200,
+	.rating				= 300,
 	.set_next_event		= pnx49xx_clkevt_set_next_event,
 	.set_state_shutdown	= pnx49xx_clkevt_shutdown,
 };
@@ -103,7 +103,7 @@ static int __init pnx49xx_timer_init(struct device_node *np)
 			base + PNX49XX_TIMER0_CTRL_SET);
 
 	ret = clocksource_mmio_init(base + PNX49XX_TIMER0_READ, "pnx49xx_clocksource",
-			rate, 200, 32, clocksource_mmio_readl_up);
+			rate, 300, 32, clocksource_mmio_readl_up);
 	if (ret) {
 		pr_err("cannot register clocksource\n");
 		return ret;
