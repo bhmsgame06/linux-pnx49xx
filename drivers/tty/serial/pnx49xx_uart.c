@@ -143,12 +143,14 @@ static irqreturn_t pnx49xx_uart_interrupt(int irq, void *dev_id)
 			port->icount.rx++;
 
 			tty_insert_flip_char(&port->state->port, ch, TTY_NORMAL);
-			tty_flip_buffer_push(&port->state->port);
 
-		} while (readl(port->membase + PNX49XX_UART_STATUS_REG) & 1);
+		} while (readl(port->membase + PNX49XX_UART_STATUS_REG) &
+				PNX49XX_UART_STATUS_REG_RX_FULL_MASK);
 
 		writel(PNX49XX_UART_CTRL_RX_INT_MASK,
 				port->membase + PNX49XX_UART_CTRL_SET_REG);
+
+		tty_flip_buffer_push(&port->state->port);
 
 	}
 
