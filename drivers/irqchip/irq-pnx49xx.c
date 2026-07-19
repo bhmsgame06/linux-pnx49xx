@@ -24,12 +24,12 @@ static struct irq_domain *pnx49xx_domain;
 
 static void pnx49xx_irq_unmask(struct irq_data *d)
 {
-	writel(1 << d->hwirq, base + PNX49XX_IRQCTRL_ENABLE_SET);
+	writel_relaxed(1 << d->hwirq, base + PNX49XX_IRQCTRL_ENABLE_SET);
 }
 
 static void pnx49xx_irq_mask(struct irq_data *d)
 {
-	writel(1 << d->hwirq, base + PNX49XX_IRQCTRL_ENABLE_CLR);
+	writel_relaxed(1 << d->hwirq, base + PNX49XX_IRQCTRL_ENABLE_CLR);
 }
 
 static struct irq_chip pnx49xx_irq_chip = {
@@ -66,9 +66,9 @@ static int __init pnx49xx_irq_init(struct device_node *node, struct device_node 
 	if (!base)
 		return -ENXIO;
 
-	writel(0xffffff00, base + PNX49XX_IRQCTRL_HWI_EDGE_CLR);
-	writel(0xff, base + PNX49XX_IRQCTRL_RI_CLR);
-	writel(0xffffffff, base + PNX49XX_IRQCTRL_ENABLE_CLR);
+	writel_relaxed(0xffffff00, base + PNX49XX_IRQCTRL_HWI_EDGE_CLR);
+	writel_relaxed(0xff, base + PNX49XX_IRQCTRL_RI_CLR);
+	writel_relaxed(0xffffffff, base + PNX49XX_IRQCTRL_ENABLE_CLR);
 
 	pnx49xx_domain = irq_domain_add_linear(node, 32, &pnx49xx_domain_ops, NULL);
 
