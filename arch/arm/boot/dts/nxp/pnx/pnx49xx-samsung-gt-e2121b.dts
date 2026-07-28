@@ -6,19 +6,79 @@
  */
 
 /dts-v1/;
+
 #include "pnx49xx.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
 
 / {
 	model = "Samsung GT-E2121B";
 	compatible = "samsung,gt-e2121b", "nxp,pnx49xx";
+
+	chosen {
+		bootargs = "console=ttyS0,9600 earlycon=pnx49xx_uart,mmio32,0x70007000";
+	};
 
 	memory@a0000000 {
 		device_type = "memory";
 		reg = <0xa0000000 0x01000000>;
 	};
 
-	chosen {
-		bootargs = "console=ttyS0,9600 earlycon=pnx49xx_uart,mmio32,0x70007000";
+	flash@90000000 {
+		compatible = "cfi-flash";
+		reg = <0x90000000 0x02000000>;
+		bank-width = <2>;
+		device-width = <2>;
+	};
+
+	matrix-keypad {
+		compatible = "gpio-matrix-keypad";
+
+		row-gpios = <&gpio 11 GPIO_ACTIVE_LOW>,
+					<&gpio 16 GPIO_ACTIVE_LOW>,
+					<&gpio 15 GPIO_ACTIVE_LOW>,
+					<&gpio 14 GPIO_ACTIVE_LOW>,
+					<&gpio 13 GPIO_ACTIVE_LOW>;
+
+		col-gpios = <&gpio 12 GPIO_ACTIVE_LOW>,
+					<&gpio 35 GPIO_ACTIVE_LOW>,
+					<&gpio 34 GPIO_ACTIVE_LOW>,
+					<&gpio 33 GPIO_ACTIVE_LOW>,
+					<&gpio 32 GPIO_ACTIVE_LOW>;
+
+		linux,keymap = <
+			MATRIX_KEY(0, 0, KEY_1)
+			MATRIX_KEY(0, 1, KEY_2)
+			MATRIX_KEY(0, 2, KEY_3)
+			MATRIX_KEY(0, 3, KEY_LEFT)
+			MATRIX_KEY(0, 4, KEY_SEND)
+
+			MATRIX_KEY(1, 0, KEY_4)
+			MATRIX_KEY(1, 1, KEY_5)
+			MATRIX_KEY(1, 2, KEY_6)
+			MATRIX_KEY(1, 3, KEY_OK)
+			MATRIX_KEY(1, 4, KEY_F1)
+
+			MATRIX_KEY(2, 0, KEY_7)
+			MATRIX_KEY(2, 1, KEY_8)
+			MATRIX_KEY(2, 2, KEY_9)
+			MATRIX_KEY(2, 3, KEY_RIGHT)
+			MATRIX_KEY(2, 4, KEY_F2)
+
+			MATRIX_KEY(3, 0, KEY_NUMERIC_STAR)
+			MATRIX_KEY(3, 1, KEY_0)
+			MATRIX_KEY(3, 2, KEY_NUMERIC_POUND)
+			MATRIX_KEY(3, 3, KEY_DOWN)
+
+			MATRIX_KEY(4, 3, KEY_UP)
+		>;
+	};
+
+	backlight {
+		compatible = "kinetic,ktd253";
+		enable-gpios = <&gpio 27 GPIO_ACTIVE_HIGH>;
+		default-brightness = <32>;
 	};
 };
 
