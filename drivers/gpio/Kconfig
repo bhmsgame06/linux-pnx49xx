@@ -586,6 +586,15 @@ config GPIO_PL061
 	help
 	  Say yes here to support the PrimeCell PL061 GPIO device.
 
+config GPIO_PNX49XX
+	tristate "NXP PNX49XX GPIO support"
+	depends on ARCH_PNX49XX
+	depends on OF
+	select GPIOLIB_IRQCHIP
+	help
+	  Select this option to enable GPIO driver for
+	  NXP PNX49XX devices.
+
 config GPIO_POLARFIRE_SOC
 	bool "Microchip FPGA GPIO support"
 	select REGMAP_MMIO

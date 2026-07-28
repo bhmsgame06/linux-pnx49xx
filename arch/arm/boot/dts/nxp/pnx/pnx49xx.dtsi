@@ -43,12 +43,27 @@
 			status = "disabled";
 		};
 
-		timer@7000b000 {
+		timer: timer@7000b000 {
 			compatible = "nxp,pnx49xx-timer";
 			reg = <0x7000b000 0x1000>;
 			interrupt-parent = <&intc>;
 			interrupts = <18>;
 			clock-frequency = <32768>;
+		};
+
+		gpio: gpio@70009000 {
+			compatible = "nxp,pnx49xx-gpio";
+			reg = <0x70009000 0x1000>, <0x70011000 0x1000>;
+			reg-names = "gpio", "gpio-pin-ic";
+
+			interrupt-parent = <&intc>;
+			interrupts = <21>, <22>;
+
+			gpio-controller;
+			#gpio-cells = <2>;
+
+			interrupt-controller;
+			#interrupt-cells = <2>;
 		};
 	};
 };
