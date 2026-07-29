@@ -29,9 +29,15 @@
 /* control masks */
 #define PNX49XX_UART_CTRL_RX_INT_MASK	0x4110
 #define PNX49XX_UART_CTRL_TX_INT_MASK	0x0020
+#define PNX49XX_UART_CTRL_TX_EN_MASK	0x0002
+
+/* mode masks */
+#define PNX49XX_UART_MODE_REG_CS7_MASK		0x0001
+#define PNX49XX_UART_MODE_REG_BREAK_MASK	0x8000
 
 /* status masks */
 #define PNX49XX_UART_STATUS_REG_RX_FULL_MASK	0x00001
+#define PNX49XX_UART_STATUS_REG_RX_BREAK_MASK	0x08000
 #define PNX49XX_UART_STATUS_REG_TX_BUSY_MASK	0x20000
 #define PNX49XX_UART_STATUS_REG_TX_EMPTY_MASK	0x80000
 
@@ -97,6 +103,24 @@ static unsigned int pnx49xx_uart_get_mctrl(struct uart_port *port)
 	return TIOCM_CAR | TIOCM_DSR | TIOCM_CTS;
 }
 
+static void pnx49xx_uart_break_ctl(struct uart_port *port, int ctl)
+{
+	unsigned int mode = readl(port->membase + PNX49XX_UART_MODE_REG);
+
+	if (ctl) {
+		mode |= PNX49XX_UART_MODE_REG_BREAK_MASK;
+		writel(mode, port->membase + PNX49XX_UART_MODE_REG);
+	} else {
+		mode &= ~PNX49XX_UART_MODE_REG_BREAK_MASK;
+		writel(mode, port->membase + PNX49XX_UART_MODE_REG);
+
+		writel(PNX49XX_UART_CTRL_TX_EN_MASK,
+				port->membase + PNX49XX_UART_CTRL_CLR_REG);
+		writel(PNX49XX_UART_CTRL_TX_EN_MASK,
+				port->membase + PNX49XX_UART_CTRL_SET_REG);
+	}
+}
+
 static void pnx49xx_uart_start_tx(struct uart_port *port)
 {
 	writel(PNX49XX_UART_CTRL_TX_INT_MASK, port->membase + PNX49XX_UART_CTRL_SET_REG);
@@ -115,14 +139,15 @@ static void pnx49xx_uart_stop_rx(struct uart_port *port)
 static irqreturn_t pnx49xx_uart_interrupt(int irq, void *dev_id)
 {
 	struct uart_port *port = dev_id;
-	unsigned int status;
+	unsigned int status, flag;
 	int irq_id;
 	u8 ch;
 
 	irq_id = readl(port->membase + PNX49XX_UART_IRQ_ID_REG);
-	status = readl(port->membase + PNX49XX_UART_STATUS_REG);
 
 	if (irq_id == PNX49XX_UART_TX_IRQ_ID) {
+
+		status = readl(port->membase + PNX49XX_UART_STATUS_REG);
 
 		uart_port_tx(port, ch,
 				!(readl(port->membase + PNX49XX_UART_STATUS_REG) &
@@ -130,22 +155,33 @@ static irqreturn_t pnx49xx_uart_interrupt(int irq, void *dev_id)
 				writeb(ch, port->membase + PNX49XX_UART_RXTX_REG)
 		);
 
-	}
-
-	if (irq_id == PNX49XX_UART_RX1_IRQ_ID || irq_id == PNX49XX_UART_RX2_IRQ_ID) {
+	} else if (irq_id == PNX49XX_UART_RX1_IRQ_ID || irq_id == PNX49XX_UART_RX2_IRQ_ID) {
 
 		writel(PNX49XX_UART_CTRL_RX_INT_MASK,
 				port->membase + PNX49XX_UART_CTRL_CLR_REG);
 
 		do {
 			ch = readb(port->membase + PNX49XX_UART_RXTX_REG);
+			status = readl(port->membase + PNX49XX_UART_STATUS_REG);
 
+			flag = TTY_NORMAL;
 			port->icount.rx++;
 
-			tty_insert_flip_char(&port->state->port, ch, TTY_NORMAL);
+			/* sysrq key handling */
+			if (unlikely(status & PNX49XX_UART_STATUS_REG_RX_BREAK_MASK)) {
+				port->icount.brk++;
 
-		} while (readl(port->membase + PNX49XX_UART_STATUS_REG) &
-				PNX49XX_UART_STATUS_REG_RX_FULL_MASK);
+				if (uart_handle_break(port))
+					continue;
+
+				flag = TTY_BREAK;
+			} else if (uart_handle_sysrq_char(port, ch)) {
+				continue;
+			}
+
+			tty_insert_flip_char(&port->state->port, ch, flag);
+
+		} while (status & PNX49XX_UART_STATUS_REG_RX_FULL_MASK);
 
 		writel(PNX49XX_UART_CTRL_RX_INT_MASK,
 				port->membase + PNX49XX_UART_CTRL_SET_REG);
@@ -183,11 +219,11 @@ static void pnx49xx_uart_set_termios(struct uart_port *port,
 	mode = readl(port->membase + PNX49XX_UART_MODE_REG);
 	switch (termios->c_cflag & CSIZE) {
 	case CS7:
-		mode |= 1;
+		mode |= PNX49XX_UART_MODE_REG_CS7_MASK;
 		break;
 
 	default:
-		mode &= ~1;
+		mode &= ~PNX49XX_UART_MODE_REG_CS7_MASK;
 		break;
 	}
 
@@ -212,6 +248,7 @@ static const struct uart_ops pnx49xx_uart_ops = {
 	.tx_empty	= pnx49xx_uart_tx_empty,
 	.set_mctrl	= pnx49xx_uart_set_mctrl,
 	.get_mctrl	= pnx49xx_uart_get_mctrl,
+	.break_ctl	= pnx49xx_uart_break_ctl,
 	.start_tx	= pnx49xx_uart_start_tx,
 	.stop_tx	= pnx49xx_uart_stop_tx,
 	.stop_rx	= pnx49xx_uart_stop_rx,
@@ -329,6 +366,8 @@ static int pnx49xx_uart_probe(struct platform_device *pdev)
 	port->uartclk = PNX49XX_UART_OSC_FREQ * 16;
 	port->line = pdev->id;
 	port->flags = UPF_BOOT_AUTOCONF;
+	port->has_sysrq = IS_ENABLED(CONFIG_SERIAL_PNX49XX_CONSOLE);
+
 	spin_lock_init(&port->lock);
 
 	ret = uart_add_one_port(&pnx49xx_uart_driver, port);
