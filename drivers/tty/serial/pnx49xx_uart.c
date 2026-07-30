@@ -33,6 +33,9 @@
 
 /* mode masks */
 #define PNX49XX_UART_MODE_REG_CS7_MASK		0x0001
+#define PNX49XX_UART_MODE_REG_PARENB_MASK	0x0002
+#define PNX49XX_UART_MODE_REG_PARODD_MASK	0x0004
+#define PNX49XX_UART_MODE_REG_TWOSTOPB_MASK	0x0008
 #define PNX49XX_UART_MODE_REG_BREAK_MASK	0x8000
 
 /* status masks */
@@ -216,19 +219,33 @@ static void pnx49xx_uart_set_termios(struct uart_port *port,
 {
 	unsigned int mode, baud;
 
+	/* mode setting */
 	mode = readl(port->membase + PNX49XX_UART_MODE_REG);
 	switch (termios->c_cflag & CSIZE) {
 	case CS7:
 		mode |= PNX49XX_UART_MODE_REG_CS7_MASK;
 		break;
 
-	default:
+	case CS8:
 		mode &= ~PNX49XX_UART_MODE_REG_CS7_MASK;
 		break;
 	}
 
+	if (termios->c_cflag & CSTOPB)
+		mode |= PNX49XX_UART_MODE_REG_TWOSTOPB_MASK;
+	else
+		mode &= ~PNX49XX_UART_MODE_REG_TWOSTOPB_MASK;
+
+	if (termios->c_cflag & PARENB)
+		mode |= PNX49XX_UART_MODE_REG_PARENB_MASK |
+			((termios->c_cflag & PARODD) ? PNX49XX_UART_MODE_REG_PARODD_MASK : 0);
+	else
+		mode &= ~(PNX49XX_UART_MODE_REG_PARENB_MASK |
+				PNX49XX_UART_MODE_REG_PARODD_MASK);
+
 	writel(mode, port->membase + PNX49XX_UART_MODE_REG);
 
+	/* baud rate setting */
 	baud = uart_get_baud_rate(port, termios, NULL, 0, port->uartclk);
 	writel(((port->uartclk / 16) / baud) - 1, port->membase + PNX49XX_UART_DIVIDER_REG);
 }
