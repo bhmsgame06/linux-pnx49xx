@@ -75,8 +75,16 @@
 		>;
 	};
 
-	backlight {
+	keypad_backlight {
+		compatible = "gpio-backlight";
+		label = "keypad_backlight";
+		gpios = <&gpio 28 GPIO_ACTIVE_HIGH>;
+		default-on;
+	};
+
+	lcd_backlight {
 		compatible = "kinetic,ktd253";
+		label = "lcd_backlight";
 		enable-gpios = <&gpio 27 GPIO_ACTIVE_HIGH>;
 		default-brightness = <32>;
 	};
