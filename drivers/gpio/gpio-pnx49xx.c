@@ -297,7 +297,7 @@ static int pnx49xx_gpio_set_config(struct gpio_chip *chip, unsigned int offset,
 		break;
 
 	default:
-		ret = -EOPNOTSUPP;
+		ret = -ENOTSUPP;
 		goto err;
 	}
 
