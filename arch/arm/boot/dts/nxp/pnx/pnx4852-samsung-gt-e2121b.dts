@@ -88,6 +88,18 @@
 		enable-gpios = <&gpio 27 GPIO_ACTIVE_HIGH>;
 		default-brightness = <32>;
 	};
+
+	lcd@80000000 {
+		compatible = "samsung,s6b33b";
+
+		reg = <0x80000000 0x100000>,
+		      <0x80100000 0x100000>;
+
+		reg-names = "cmd", "data";
+
+		reset-gpios = <&gpio 8 GPIO_ACTIVE_LOW>;
+		cs-gpios = <&gpio 29 GPIO_ACTIVE_HIGH>;
+	};
 };
 
 &uart0 {
