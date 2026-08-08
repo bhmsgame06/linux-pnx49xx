@@ -17,7 +17,7 @@
 	compatible = "samsung,gt-e2121b", "nxp,pnx49xx";
 
 	chosen {
-		bootargs = "console=ttyS0,9600 earlycon=pnx49xx_uart,mmio32,0x70007000";
+		bootargs = "console=ttyS0,115200 earlycon=pnx49xx_uart,mmio32,0x70007000";
 	};
 
 	memory@a0000000 {
