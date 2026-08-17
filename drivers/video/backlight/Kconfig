@@ -343,6 +343,12 @@ config BACKLIGHT_RT4831
 	  It's commonly used to drive the display WLED. There're four channels
 	  inisde, and each channel can provide up to 30mA current.
 
+config BACKLIGHT_RT9363
+	tristate "Richtek RT9363 Backlight Driver"
+	depends on GPIOLIB || COMPILE_TEST
+	help
+	  This enables support for Richtek RT9363 Backlight driver.
+
 config BACKLIGHT_SAHARA
 	tristate "Tabletkiosk Sahara Touch-iT Backlight Driver"
 	depends on X86
