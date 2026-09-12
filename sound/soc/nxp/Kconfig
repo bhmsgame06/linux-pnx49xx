@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+menu "NXP"
+
+config SND_SOC_NXP
+	tristate
+
+config SND_SOC_PNX49XX
+	tristate "ASoC support for NXP PNX49XX chip"
+	depends on ARCH_PNX49XX
+	select SND_SOC_NXP
+	help
+	  This adds ASoC driver for NXP PNX49XX boards.
+
+endmenu
