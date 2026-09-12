@@ -107,3 +107,7 @@
 &uart1 {
 	status = "okay";
 };
+
+&audio {
+	status = "okay";
+};

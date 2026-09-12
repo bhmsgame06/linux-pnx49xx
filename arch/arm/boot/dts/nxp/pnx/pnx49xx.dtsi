@@ -65,5 +65,14 @@
 			interrupt-controller;
 			#interrupt-cells = <2>;
 		};
+
+		audio: audio@70008000 {
+			compatible = "nxp,pnx49xx-audio";
+			reg = <0x70008000 0x1000>, <0x70002000 0x1000>;
+			reg-names = "dsp", "sysconf";
+			status = "disabled";
+
+			#sound-dai-cells = <0>;
+		};
 	};
 };
