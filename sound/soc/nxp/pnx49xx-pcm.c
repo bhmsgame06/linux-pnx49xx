@@ -349,7 +349,7 @@ static int pnx49xx_pcm_trigger(struct snd_soc_component *component, struct snd_p
 
 	case SNDRV_PCM_TRIGGER_STOP:
 		/* disable high resolution timer */
-		hrtimer_cancel(&priv->timer);
+		hrtimer_try_to_cancel(&priv->timer);
 		break;
 
 	default:
