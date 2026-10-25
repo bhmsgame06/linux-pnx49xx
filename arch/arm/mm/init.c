@@ -220,6 +220,19 @@ static inline void poison_init_mem(void *s, size_t count)
 		*p++ = 0xe7fddef0;
 }
 
+#ifdef CONFIG_XIP_KERNEL
+void __init arch_setup_zero_pages(void)
+{
+	void *zero_page = memblock_alloc(PAGE_SIZE, PAGE_SIZE);
+
+	if (!zero_page)
+		panic("failed to allocate the zero page\n");
+
+	__zero_page = virt_to_page(zero_page);
+	flush_dcache_folio(page_folio(__zero_page));
+}
+#endif /* CONFIG_XIP_KERNEL */
+
 void __init arch_mm_preinit(void)
 {
 #ifdef CONFIG_ARM_LPAE
