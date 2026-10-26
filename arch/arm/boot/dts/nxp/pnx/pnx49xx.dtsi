@@ -51,6 +51,11 @@
 			clock-frequency = <32768>;
 		};
 
+		wdt: watchdog@70003000 {
+			compatible = "nxp,pnx49xx-wdt";
+			reg = <0x70003000 0x1000>;
+		};
+
 		gpio: gpio@70009000 {
 			compatible = "nxp,pnx49xx-gpio";
 			reg = <0x70009000 0x1000>, <0x70011000 0x1000>;

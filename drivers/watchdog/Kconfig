@@ -638,6 +638,16 @@ config PNX4008_WATCHDOG
 
 	  Say N if you are unsure.
 
+config PNX49XX_WATCHDOG
+	tristate "PNX49XX Watchdog"
+	depends on ARCH_PNX49XX || COMPILE_TEST
+	select WATCHDOG_CORE
+	help
+	  Say Y here if to include support for the watchdog timer
+	  in the PNX49XX processor.
+	  This driver can be built as a module by choosing M. The module
+	  will be called pnx49xx_wdt.
+
 config DAVINCI_WATCHDOG
 	tristate "DaVinci watchdog"
 	depends on ARCH_DAVINCI || ARCH_KEYSTONE || COMPILE_TEST
